@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from core import init_db
 from modules.auth import auth_router
 
 app = FastAPI()
+init_db()
 app.include_router(auth_router)
 
 
