@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer,String,Boolean,ForeignKey,DateTime
 from sqlalchemy.orm import relationship
-from database import Base
+from core.database import Base
 
 class User(Base):
     __tablename__ = "kitchio_users"
