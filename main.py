@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from core import init_db
 from modules.auth import auth_router
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 init_db()
