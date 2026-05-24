@@ -11,4 +11,6 @@ class User(Base):
     created_at = Column(DateTime)
     role = Column(String, default="U") # U: User, A:Admin/SuperUser
     is_active = Column(Boolean, default=True)
+    date_status_changed = Column(DateTime, nullable=True)
+    
 

@@ -30,10 +30,10 @@ def verify_user_exists(db:Session, user: UserCreate):
         if stmt_username:
             print("User already exists")
             return True
+        if stmt_email := db.query(User).filter((User.email == user.email)).first():
+            print("Email already exists")
+            return True
         else:
-            if stmt_email := db.query(User).filter((User.email == user.email)).first():
-                print("Email already exists")
-                return True
             print("User does not exist")
             return False
        except Exception as e:
@@ -53,3 +53,22 @@ def get_user_by_username(db: Session, username:str):
         logging.error(f'Error in get_user_by_username: {e}')
         raise HTTPException(status_code=500, detail=f'Error in get_user_by_username: {e}')
     
+def change_status_user(db: Session, username: str):
+        stmt = db.query(User).filter(User.username == username).first()
+        try:
+            if stmt and stmt.is_active:
+                stmt.is_active = False
+                stmt.date_status_changed = datetime.now(timezone.utc)
+                db.commit()
+                logging.info(f'User {username} deactivated successfully')
+            elif stmt and not stmt.is_active:
+                stmt.is_active = True
+                stmt.date_status_changed = datetime.now(timezone.utc)
+                db.commit()
+                logging.info(f'User {username} activated successfully')
+            else:
+                logging.warning(f'User not found with username: {username}')
+                raise HTTPException(status_code=404, detail=f'User not found with username: {username}')
+        except Exception as e:
+            logging.error(f'Error in change_status_user: {e}')
+            raise HTTPException(status_code=500, detail=f'Error in change_status_user: {e}')
