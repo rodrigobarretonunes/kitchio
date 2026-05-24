@@ -1,11 +1,11 @@
 from passlib.context import CryptContext
-from dotenv import load_dotenv
 import os 
 import logging
 from jose import jwt
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 #================= Password Hashing and Verification =================#
@@ -50,17 +50,28 @@ def verify_token(token:str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 # In the future this function will be replace in another module called auth_dependencies.
-def get_current_user(token:str):
+def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = verify_token(token)
+
         user_id = payload.get("sub")
         username = payload.get("username")
         role = payload.get("role")
+
         if user_id is None or username is None:
             logging.warning("Invalid token payload")
-            raise HTTPException(status_code=401, detail="Invalid token payload")
-        else:
-            logging.info(f"Token verified successfully for user: {username}")
-            return {"user_id": user_id, "username": username, "role": role}
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token payload"
+            )
+
+        logging.info(f"Token verified successfully for user: {username}")
+
+        return {
+            "user_id": user_id,
+            "username": username,
+            "role": role
+        }
+
     except HTTPException as e:
         raise e
